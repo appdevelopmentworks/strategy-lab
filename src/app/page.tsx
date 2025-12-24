@@ -407,8 +407,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t py-6 mt-12">
         <div className="container text-center text-sm text-muted-foreground">
-          <p>StrategyLab v1.3 - システムトレード戦略バックテストツール</p>
-          <p className="mt-1">72種類の戦略 × 複数銘柄対応 × パラメーター最適化</p>
+          <p>StrategyLab v1.5.0 - システムトレード戦略バックテストツール</p>
+          <p className="mt-1">72種類の戦略 × 複数銘柄対応 × パラメーター最適化 × 資金管理指標</p>
         </div>
       </footer>
     </div>

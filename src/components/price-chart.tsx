@@ -163,7 +163,7 @@ export function PriceChart({ stockData, signals, strategyName, ticker }: PriceCh
             position: signal.type === 'BUY' ? 'belowBar' as const : 'aboveBar' as const,
             color: signal.type === 'BUY' ? '#22c55e' : '#ef4444',
             shape: signal.type === 'BUY' ? 'arrowUp' as const : 'arrowDown' as const,
-            text: signal.type === 'BUY' ? '買' : '売',
+            text: signal.type === 'BUY' ? 'Entry' : 'Exit',
           }
         })
         .filter((m): m is NonNullable<typeof m> => m !== null)
@@ -195,7 +195,7 @@ export function PriceChart({ stockData, signals, strategyName, ticker }: PriceCh
             position: signal.type === 'BUY' ? 'belowBar' as const : 'aboveBar' as const,
             color: signal.type === 'BUY' ? '#22c55e' : '#ef4444',
             shape: signal.type === 'BUY' ? 'arrowUp' as const : 'arrowDown' as const,
-            text: signal.type === 'BUY' ? '買' : '売',
+            text: signal.type === 'BUY' ? 'Entry' : 'Exit',
           }
         })
         .filter((m): m is NonNullable<typeof m> => m !== null)
@@ -288,11 +288,14 @@ export function PriceChart({ stockData, signals, strategyName, ticker }: PriceCh
             <div className="flex items-center gap-3 mr-4 text-sm">
               <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
                 <TrendingUp className="h-4 w-4" />
-                買い: {buySignals}
+                エントリー: {buySignals}
               </span>
               <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
                 <TrendingDown className="h-4 w-4" />
-                売り: {sellSignals}
+                決済: {sellSignals}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                ※ロングのみ
               </span>
             </div>
             
@@ -383,7 +386,7 @@ export function PriceChart({ stockData, signals, strategyName, ticker }: PriceCh
                     <TrendingDown className="h-4 w-4" />
                   )}
                   <span className="font-medium">
-                    {tooltipData.data.signal.type === 'BUY' ? '買いシグナル' : '売りシグナル'}
+                    {tooltipData.data.signal.type === 'BUY' ? 'Entry' : 'Exit'}
                   </span>
                 </div>
               )}

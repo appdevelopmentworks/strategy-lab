@@ -3,7 +3,10 @@ import yahooFinance from 'yahoo-finance2'
 import type { OHLCV, Period } from '@/types'
 
 // Period to date range mapping
-const periodToDays: Record<Period, number> = {
+const periodToDays: Record<string, number> = {
+  '1mo': 30,
+  '3mo': 90,
+  '6mo': 180,
   '1y': 365,
   '3y': 365 * 3,
   '5y': 365 * 5,
@@ -22,7 +25,8 @@ export async function GET(
     // Calculate date range
     const endDate = new Date()
     const startDate = new Date()
-    startDate.setDate(startDate.getDate() - periodToDays[period])
+    const days = periodToDays[period] || 365 * 5 // Default to 5 years
+    startDate.setDate(startDate.getDate() - days)
 
     // Fetch data from Yahoo Finance
     const result = await yahooFinance.historical(ticker, {

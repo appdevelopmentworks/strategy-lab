@@ -592,25 +592,25 @@ export function OptimizationPanel({ selectedResult, stockData, allResults = [] }
                     <Card>
                       <CardContent className="py-4">
                         <p className="text-xs text-muted-foreground">勝率</p>
-                        <p className="text-2xl font-bold">{gridSearchResult.bestMetrics.winRate.toFixed(1)}%</p>
+                        <p className="text-2xl font-bold">{(gridSearchResult.bestMetrics?.winRate ?? 0).toFixed(1)}%</p>
                       </CardContent>
                     </Card>
                     <Card>
                       <CardContent className="py-4">
                         <p className="text-xs text-muted-foreground">総リターン</p>
-                        <p className="text-2xl font-bold">{gridSearchResult.bestMetrics.totalReturn.toFixed(1)}%</p>
+                        <p className="text-2xl font-bold">{(gridSearchResult.bestMetrics?.totalReturn ?? 0).toFixed(1)}%</p>
                       </CardContent>
                     </Card>
                     <Card>
                       <CardContent className="py-4">
                         <p className="text-xs text-muted-foreground">PF</p>
-                        <p className="text-2xl font-bold">{gridSearchResult.bestMetrics.profitFactor.toFixed(2)}</p>
+                        <p className="text-2xl font-bold">{(gridSearchResult.bestMetrics?.profitFactor ?? 0).toFixed(2)}</p>
                       </CardContent>
                     </Card>
                     <Card>
                       <CardContent className="py-4">
                         <p className="text-xs text-muted-foreground">トレード数</p>
-                        <p className="text-2xl font-bold">{gridSearchResult.bestMetrics.totalTrades}</p>
+                        <p className="text-2xl font-bold">{gridSearchResult.bestMetrics?.totalTrades ?? 0}</p>
                       </CardContent>
                     </Card>
                   </div>
