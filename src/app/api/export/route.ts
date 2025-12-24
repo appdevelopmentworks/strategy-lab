@@ -33,25 +33,45 @@ function tradesToCsv(trades: Trade[]): string {
   return [header, ...rows].join('\n')
 }
 
+function formatValue(value: number, decimals: number = 2): string {
+  if (value === Infinity) return 'Infinity'
+  if (value === -Infinity) return '-Infinity'
+  if (isNaN(value)) return 'N/A'
+  return value.toFixed(decimals)
+}
+
 function metricsToCsv(result: BacktestResult): string {
   const { metrics } = result
-  return `Strategy,${result.strategyNameJa} (${result.strategyId})
+  return `=== STRATEGY INFO ===
+Strategy,${result.strategyNameJa} (${result.strategyId})
 Ticker,${result.ticker}
 Period,${result.period}
 
-Win Rate,${metrics.winRate.toFixed(2)}%
+=== BASIC METRICS ===
+Win Rate,${formatValue(metrics.winRate)}%
 Total Trades,${metrics.totalTrades}
 Winning Trades,${metrics.winningTrades}
 Losing Trades,${metrics.losingTrades}
-Average Win,${metrics.avgWin.toFixed(2)}%
-Average Loss,${metrics.avgLoss.toFixed(2)}%
-Total Return,${metrics.totalReturn.toFixed(2)}%
-Profit Factor,${metrics.profitFactor.toFixed(2)}
-Max Drawdown,${metrics.maxDrawdown.toFixed(2)}%
-Sharpe Ratio,${metrics.sharpeRatio.toFixed(2)}
+Average Win,${formatValue(metrics.avgWin)}%
+Average Loss,${formatValue(metrics.avgLoss)}%
+Total Return,${formatValue(metrics.totalReturn)}%
+Profit Factor,${formatValue(metrics.profitFactor)}
+Max Drawdown,${formatValue(metrics.maxDrawdown)}%
+Sharpe Ratio,${formatValue(metrics.sharpeRatio)}
 Max Consecutive Wins,${metrics.maxConsecutiveWins}
 Max Consecutive Losses,${metrics.maxConsecutiveLosses}
-Average Holding Period,${metrics.avgHoldingPeriod.toFixed(1)} days`
+Average Holding Period,${formatValue(metrics.avgHoldingPeriod, 1)} days
+
+=== MONEY MANAGEMENT METRICS ===
+Expectancy (per trade),${formatValue(metrics.expectancy)}%
+Payoff Ratio,${formatValue(metrics.payoffRatio)}
+Recovery Factor,${formatValue(metrics.recoveryFactor)}
+Kelly Criterion,${formatValue(metrics.kellyPercent)}%
+Daily Volatility,${formatValue(metrics.dailyVolatility)}%
+Average ATR %,${formatValue(metrics.avgATRPercent)}%
+CAGR,${formatValue(metrics.cagr)}%
+Calmar Ratio,${formatValue(metrics.calmarRatio)}
+Risk of Ruin (est),${formatValue(metrics.riskOfRuin)}%`
 }
 
 export async function POST(request: NextRequest) {
@@ -70,7 +90,48 @@ export async function POST(request: NextRequest) {
           parameters: data.parameters,
           exportedAt: new Date().toISOString(),
         },
-        metrics: data.metrics,
+        metrics: {
+          // Basic metrics
+          winRate: data.metrics.winRate,
+          totalTrades: data.metrics.totalTrades,
+          winningTrades: data.metrics.winningTrades,
+          losingTrades: data.metrics.losingTrades,
+          avgWin: data.metrics.avgWin,
+          avgLoss: data.metrics.avgLoss,
+          totalReturn: data.metrics.totalReturn,
+          profitFactor: data.metrics.profitFactor,
+          maxDrawdown: data.metrics.maxDrawdown,
+          sharpeRatio: data.metrics.sharpeRatio,
+          maxConsecutiveWins: data.metrics.maxConsecutiveWins,
+          maxConsecutiveLosses: data.metrics.maxConsecutiveLosses,
+          avgHoldingPeriod: data.metrics.avgHoldingPeriod,
+          grossProfit: data.metrics.grossProfit,
+          grossLoss: data.metrics.grossLoss,
+          // Money management metrics
+          expectancy: data.metrics.expectancy,
+          payoffRatio: data.metrics.payoffRatio,
+          recoveryFactor: data.metrics.recoveryFactor,
+          kellyPercent: data.metrics.kellyPercent,
+          dailyVolatility: data.metrics.dailyVolatility,
+          avgATRPercent: data.metrics.avgATRPercent,
+          cagr: data.metrics.cagr,
+          calmarRatio: data.metrics.calmarRatio,
+          riskOfRuin: data.metrics.riskOfRuin,
+        },
+        // Separate money management section for easy access
+        moneyManagement: {
+          expectancy: data.metrics.expectancy,
+          payoffRatio: data.metrics.payoffRatio,
+          maxDrawdown: data.metrics.maxDrawdown,
+          maxConsecutiveLosses: data.metrics.maxConsecutiveLosses,
+          recoveryFactor: data.metrics.recoveryFactor,
+          kellyPercent: data.metrics.kellyPercent,
+          dailyVolatility: data.metrics.dailyVolatility,
+          avgATRPercent: data.metrics.avgATRPercent,
+          cagr: data.metrics.cagr,
+          calmarRatio: data.metrics.calmarRatio,
+          riskOfRuin: data.metrics.riskOfRuin,
+        },
         signals: includeSignals ? data.signals : undefined,
         trades: includeTrades ? data.trades : undefined,
       }

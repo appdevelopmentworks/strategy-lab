@@ -377,6 +377,7 @@ export default function Home() {
               <OptimizationPanel
                 selectedResult={selectedResult}
                 stockData={selectedResult ? (stockDataMap.get(selectedResult.ticker) || []) : []}
+                allResults={results}
               />
             </TabsContent>
             

@@ -17,3 +17,22 @@ export {
   type MonteCarloConfig,
   type MonteCarloResult,
 } from './monte-carlo'
+
+export {
+  runWalkForward,
+  evaluateOverfitRisk,
+  getWalkForwardRecommendation,
+  type WalkForwardConfig,
+  type WalkForwardResult,
+  type WalkForwardWindow,
+} from './walk-forward'
+
+export {
+  runPortfolioOptimization,
+  calculateReturns,
+  getMethodDescription,
+  type PortfolioConfig,
+  type PortfolioResult,
+  type PortfolioAsset,
+  type PortfolioOptMethod,
+} from './portfolio'

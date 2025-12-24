@@ -34,6 +34,34 @@ export interface Strategy {
 }
 
 /**
+ * Calculate ATR (Average True Range)
+ */
+function calculateATR(data: OHLCV[], period: number = 14): number[] {
+  const atr: number[] = []
+  const trueRanges: number[] = []
+  
+  for (let i = 0; i < data.length; i++) {
+    if (i === 0) {
+      trueRanges.push(data[i].high - data[i].low)
+    } else {
+      const tr = Math.max(
+        data[i].high - data[i].low,
+        Math.abs(data[i].high - data[i - 1].close),
+        Math.abs(data[i].low - data[i - 1].close)
+      )
+      trueRanges.push(tr)
+    }
+    
+    if (i >= period - 1) {
+      const sum = trueRanges.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0)
+      atr.push(sum / period)
+    }
+  }
+  
+  return atr
+}
+
+/**
  * Execute backtest on historical data using given signals
  */
 export function executeBacktest(
@@ -146,7 +174,7 @@ export function executeBacktest(
   }
   
   // Calculate metrics
-  const metrics = calculateMetrics(trades, equity, INITIAL_CAPITAL, maxDrawdown)
+  const metrics = calculateMetrics(trades, equity, data, INITIAL_CAPITAL, maxDrawdown)
   
   return { trades, equity, metrics }
 }
@@ -157,27 +185,41 @@ export function executeBacktest(
 export function calculateMetrics(
   trades: Trade[],
   equity: EquityPoint[],
+  data: OHLCV[],
   initialCapital: number,
   maxDrawdown: number
 ): BacktestMetrics {
+  // Default values for empty metrics
+  const emptyMetrics: BacktestMetrics = {
+    winRate: 0,
+    totalTrades: 0,
+    winningTrades: 0,
+    losingTrades: 0,
+    avgWin: 0,
+    avgLoss: 0,
+    totalReturn: 0,
+    profitFactor: 0,
+    maxDrawdown: 0,
+    sharpeRatio: 0,
+    maxConsecutiveWins: 0,
+    maxConsecutiveLosses: 0,
+    avgHoldingPeriod: 0,
+    grossProfit: 0,
+    grossLoss: 0,
+    // 資金管理用指標
+    expectancy: 0,
+    payoffRatio: 0,
+    recoveryFactor: 0,
+    kellyPercent: 0,
+    dailyVolatility: 0,
+    avgATRPercent: 0,
+    cagr: 0,
+    calmarRatio: 0,
+    riskOfRuin: 0,
+  }
+  
   if (trades.length === 0) {
-    return {
-      winRate: 0,
-      totalTrades: 0,
-      winningTrades: 0,
-      losingTrades: 0,
-      avgWin: 0,
-      avgLoss: 0,
-      totalReturn: 0,
-      profitFactor: 0,
-      maxDrawdown: 0,
-      sharpeRatio: 0,
-      maxConsecutiveWins: 0,
-      maxConsecutiveLosses: 0,
-      avgHoldingPeriod: 0,
-      grossProfit: 0,
-      grossLoss: 0,
-    }
+    return emptyMetrics
   }
   
   const winningTrades = trades.filter(t => t.profitPct > 0)
@@ -198,7 +240,7 @@ export function calculateMetrics(
   const finalEquity = equity.length > 0 ? equity[equity.length - 1].equity : initialCapital
   const totalReturn = ((finalEquity - initialCapital) / initialCapital) * 100
   
-  // Calculate Sharpe Ratio
+  // Calculate daily returns for Sharpe ratio and volatility
   const returns: number[] = []
   for (let i = 1; i < equity.length; i++) {
     const dailyReturn = (equity[i].equity - equity[i - 1].equity) / equity[i - 1].equity
@@ -240,6 +282,78 @@ export function calculateMetrics(
   // Calculate average holding period
   const avgHoldingPeriod = trades.reduce((sum, t) => sum + t.holdingDays, 0) / trades.length
   
+  // ========================================
+  // 資金管理用指標の計算
+  // ========================================
+  
+  // 1. 期待値 (Expectancy) - 1トレードあたりの期待利益%
+  // Expectancy = (勝率 × 平均利益) + (敗率 × 平均損失)
+  const winRateDecimal = winRate / 100
+  const loseRateDecimal = 1 - winRateDecimal
+  const expectancy = (winRateDecimal * avgWin) + (loseRateDecimal * avgLoss)
+  
+  // 2. ペイオフレシオ (Payoff Ratio) - 平均利益 ÷ 平均損失の絶対値
+  const payoffRatio = avgLoss !== 0 ? Math.abs(avgWin / avgLoss) : avgWin > 0 ? Infinity : 0
+  
+  // 3. リカバリーファクター (Recovery Factor) - 総リターン ÷ 最大DD
+  const recoveryFactor = maxDrawdown > 0 ? totalReturn / maxDrawdown : totalReturn > 0 ? Infinity : 0
+  
+  // 4. ケリー基準 (Kelly Criterion) - 最適ポジションサイズ%
+  // Kelly% = W - (1-W)/R  where W=勝率, R=ペイオフレシオ
+  // 実用的には半ケリー（Kelly÷2）がよく使われる
+  let kellyPercent = 0
+  if (payoffRatio > 0 && payoffRatio !== Infinity) {
+    kellyPercent = (winRateDecimal - ((1 - winRateDecimal) / payoffRatio)) * 100
+    // 負のケリーは0にする（期待値マイナスの戦略）
+    kellyPercent = Math.max(0, kellyPercent)
+  }
+  
+  // 5. 日次ボラティリティ (Daily Volatility) - 日次リターンの標準偏差%
+  const dailyVolatility = stdDev * 100
+  
+  // 6. 平均ATR% (Average ATR Percent) - 終値に対するATRの割合
+  let avgATRPercent = 0
+  if (data.length > 14) {
+    const atrValues = calculateATR(data, 14)
+    if (atrValues.length > 0) {
+      const avgATR = atrValues.reduce((a, b) => a + b, 0) / atrValues.length
+      const avgClose = data.slice(-atrValues.length).reduce((sum, d) => sum + d.close, 0) / atrValues.length
+      avgATRPercent = avgClose > 0 ? (avgATR / avgClose) * 100 : 0
+    }
+  }
+  
+  // 7. CAGR (Compound Annual Growth Rate) - 年率換算リターン
+  let cagr = 0
+  if (equity.length >= 2) {
+    const totalDays = (equity[equity.length - 1].date.getTime() - equity[0].date.getTime()) / (1000 * 60 * 60 * 24)
+    const years = totalDays / 365
+    if (years > 0 && finalEquity > 0 && initialCapital > 0) {
+      cagr = (Math.pow(finalEquity / initialCapital, 1 / years) - 1) * 100
+    }
+  }
+  
+  // 8. カルマーレシオ (Calmar Ratio) - CAGR ÷ 最大DD
+  const calmarRatio = maxDrawdown > 0 ? cagr / maxDrawdown : cagr > 0 ? Infinity : 0
+  
+  // 9. 破産確率の目安 (Risk of Ruin) - 簡易版
+  // RoR ≈ ((1 - Edge) / (1 + Edge))^Units
+  // Edge = 期待値 / 平均損失の絶対値
+  // Units = 資金 / 1トレードあたりのリスク
+  let riskOfRuin = 0
+  if (avgLoss !== 0 && expectancy !== 0) {
+    const edge = expectancy / Math.abs(avgLoss)
+    if (edge > -1 && edge < 1) {
+      // 簡易計算: 20単位（資金を20分割）として計算
+      const units = 20
+      riskOfRuin = Math.pow((1 - edge) / (1 + edge), units) * 100
+      riskOfRuin = Math.min(100, Math.max(0, riskOfRuin))
+    } else if (edge >= 1) {
+      riskOfRuin = 0 // 非常に有利な戦略
+    } else {
+      riskOfRuin = 100 // 非常に不利な戦略
+    }
+  }
+  
   return {
     winRate,
     totalTrades: trades.length,
@@ -256,6 +370,16 @@ export function calculateMetrics(
     avgHoldingPeriod,
     grossProfit,
     grossLoss,
+    // 資金管理用指標
+    expectancy,
+    payoffRatio,
+    recoveryFactor,
+    kellyPercent,
+    dailyVolatility,
+    avgATRPercent,
+    cagr,
+    calmarRatio,
+    riskOfRuin,
   }
 }
 
