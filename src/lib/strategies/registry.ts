@@ -80,8 +80,11 @@ import {
 } from './composite/composite-strategies'
 import { SeasonalityStrategy, WeeklyPivotStrategy } from './composite/extended'
 
+// Calendar strategies
+import { calendarStrategies } from './calendar'
+
 /**
- * All registered strategies (62 total)
+ * All registered strategies (72 total)
  */
 export const strategies: Strategy[] = [
   // Trend Following (13)
@@ -153,6 +156,8 @@ export const strategies: Strategy[] = [
   HighLowBreakout,
   SeasonalityStrategy,
   WeeklyPivotStrategy,
+  // Calendar (10)
+  ...calendarStrategies,
 ]
 
 /**
@@ -921,6 +926,108 @@ export const strategyRegistry: StrategyInfo[] = [
     descriptionJa: '週足ベースのピボットポイント',
     parameters: [
       { name: 'threshold', label: 'Threshold', labelJa: '閾値', type: 'number', default: 0.02, min: 0.01, max: 0.05, step: 0.01 },
+    ],
+  },
+
+  // ===== Calendar (10) =====
+  {
+    id: 'CA001',
+    name: 'Monday Buy / Friday Sell',
+    nameJa: '月曜買い・金曜売り',
+    category: 'calendar',
+    description: 'Buy on Monday, sell on Friday',
+    descriptionJa: '月曜日に買い、金曜日に売り（週内トレード）',
+    parameters: [],
+  },
+  {
+    id: 'CA002',
+    name: 'Friday Buy / Monday Sell',
+    nameJa: '金曜買い・月曜売り',
+    category: 'calendar',
+    description: 'Buy on Friday, sell on Monday (weekend effect)',
+    descriptionJa: '金曜日に買い、月曜日に売り（週末効果）',
+    parameters: [],
+  },
+  {
+    id: 'CA003',
+    name: 'Tuesday Buy / Thursday Sell',
+    nameJa: '火曜買い・木曜売り',
+    category: 'calendar',
+    description: 'Mid-week trading strategy',
+    descriptionJa: '火曜日に買い、木曜日に売り（週中トレード）',
+    parameters: [],
+  },
+  {
+    id: 'CA004',
+    name: 'Month Start Buy / End Sell',
+    nameJa: '月初買い・月末売り',
+    category: 'calendar',
+    description: 'Buy at month start, sell at month end',
+    descriptionJa: '月初に買い、月末に売り',
+    parameters: [],
+  },
+  {
+    id: 'CA005',
+    name: 'Month End Buy / Start Sell',
+    nameJa: '月末買い・月初売り',
+    category: 'calendar',
+    description: 'Turn of month effect strategy',
+    descriptionJa: '月末に買い、月初に売り（月替わり効果）',
+    parameters: [],
+  },
+  {
+    id: 'FH001',
+    name: '1-Day Hold',
+    nameJa: '1日保有',
+    category: 'calendar',
+    description: 'Fixed 1-day holding period',
+    descriptionJa: '固定1日間保有して売り',
+    parameters: [
+      { name: 'holdingDays', label: 'Holding Days', labelJa: '保有日数', type: 'number', default: 1, min: 1, max: 60, step: 1 },
+    ],
+  },
+  {
+    id: 'FH002',
+    name: '3-Day Hold',
+    nameJa: '3日保有',
+    category: 'calendar',
+    description: 'Fixed 3-day holding period',
+    descriptionJa: '固定3日間保有して売り',
+    parameters: [
+      { name: 'holdingDays', label: 'Holding Days', labelJa: '保有日数', type: 'number', default: 3, min: 1, max: 60, step: 1 },
+    ],
+  },
+  {
+    id: 'FH003',
+    name: '5-Day Hold',
+    nameJa: '5日保有',
+    category: 'calendar',
+    description: 'Fixed 5-day holding period (weekly)',
+    descriptionJa: '固定5日間保有して売り（週間）',
+    parameters: [
+      { name: 'holdingDays', label: 'Holding Days', labelJa: '保有日数', type: 'number', default: 5, min: 1, max: 60, step: 1 },
+    ],
+  },
+  {
+    id: 'FH004',
+    name: '10-Day Hold',
+    nameJa: '10日保有',
+    category: 'calendar',
+    description: 'Fixed 10-day holding period (2 weeks)',
+    descriptionJa: '固定10日間保有して売り（2週間）',
+    parameters: [
+      { name: 'holdingDays', label: 'Holding Days', labelJa: '保有日数', type: 'number', default: 10, min: 1, max: 60, step: 1 },
+    ],
+  },
+  {
+    id: 'FH005',
+    name: '20-Day Hold',
+    nameJa: '20日保有',
+    category: 'calendar',
+    description: 'Fixed 20-day holding period (monthly)',
+    descriptionJa: '固定20日間保有して売り（月間）',
+    parameters: [
+      { name: 'holdingDays', label: 'Holding Days', labelJa: '保有日数', type: 'number', default: 20, min: 1, max: 60, step: 1 },
     ],
   },
 ]

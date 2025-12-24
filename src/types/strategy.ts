@@ -11,6 +11,7 @@ export type StrategyCategory =
   | 'volume'               // ボリューム
   | 'pattern'              // パターン認識
   | 'composite'            // 複合
+  | 'calendar'             // カレンダー（曜日・月初月末・固定保有）
 
 /** Parameter definition for a strategy */
 export interface ParameterDefinition {

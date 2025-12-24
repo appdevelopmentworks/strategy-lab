@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Play, X, Plus, Loader2 } from 'lucide-react'
+import { Play, X, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,40 +27,43 @@ export interface AnalysisConfig {
 }
 
 export function TickerInput({ onAnalyze, isLoading }: TickerInputProps) {
-  const [tickers, setTickers] = useState<string[]>(['AAPL'])
-  const [currentInput, setCurrentInput] = useState('')
-  const [period, setPeriod] = useState('5y')
-  const [minTrades, setMinTrades] = useState('30')
+  const [tickerInput, setTickerInput] = useState('')
+  const [period, setPeriod] = useState('1y')
+  const [minTrades, setMinTrades] = useState('0')
   const [objective, setObjective] = useState('winRate')
 
-  const addTicker = () => {
-    const ticker = currentInput.trim().toUpperCase()
-    if (ticker && !tickers.includes(ticker) && tickers.length < 5) {
-      setTickers([...tickers, ticker])
-      setCurrentInput('')
-    }
+  // Parse ticker input (comma or space separated)
+  const parseTickers = (input: string): string[] => {
+    return input
+      .split(/[,\s]+/)
+      .map(t => t.trim().toUpperCase())
+      .filter(t => t.length > 0)
+      .slice(0, 5) // Max 5 tickers
   }
 
+  const currentTickers = parseTickers(tickerInput)
+
   const removeTicker = (tickerToRemove: string) => {
-    setTickers(tickers.filter(t => t !== tickerToRemove))
+    const newTickers = currentTickers.filter(t => t !== tickerToRemove)
+    setTickerInput(newTickers.join(', '))
+  }
+
+  const handleAnalyze = () => {
+    if (currentTickers.length === 0) return
+    
+    onAnalyze({
+      tickers: currentTickers,
+      period,
+      minTrades: parseInt(minTrades),
+      objective,
+    })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      addTicker()
+      handleAnalyze()
     }
-  }
-
-  const handleAnalyze = () => {
-    if (tickers.length === 0) return
-    
-    onAnalyze({
-      tickers,
-      period,
-      minTrades: parseInt(minTrades),
-      objective,
-    })
   }
 
   return (
@@ -69,44 +72,40 @@ export function TickerInput({ onAnalyze, isLoading }: TickerInputProps) {
         <div className="space-y-4">
           {/* Ticker Input */}
           <div className="space-y-2">
-            <Label htmlFor="ticker">ティッカーコード（最大5銘柄）</Label>
-            <div className="flex space-x-2">
-              <Input
-                id="ticker"
-                placeholder="AAPL, 7203.T など"
-                value={currentInput}
-                onChange={(e) => setCurrentInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={tickers.length >= 5}
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={addTicker}
-                disabled={tickers.length >= 5 || !currentInput.trim()}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+            <Label htmlFor="ticker">ティッカーコード（最大5銘柄、カンマまたはスペース区切り）</Label>
+            <Input
+              id="ticker"
+              placeholder="例: AAPL, NVDA, MSFT または 7203.T"
+              value={tickerInput}
+              onChange={(e) => setTickerInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
             
-            {/* Ticker Tags */}
-            <div className="flex flex-wrap gap-2">
-              {tickers.map(ticker => (
-                <span
-                  key={ticker}
-                  className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
-                >
-                  {ticker}
-                  <button
-                    type="button"
-                    onClick={() => removeTicker(ticker)}
-                    className="ml-2 hover:text-primary/70"
+            {/* Ticker Tags (preview) */}
+            {currentTickers.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {currentTickers.map(ticker => (
+                  <span
+                    key={ticker}
+                    className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
                   >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
+                    {ticker}
+                    <button
+                      type="button"
+                      onClick={() => removeTicker(ticker)}
+                      className="ml-2 hover:text-primary/70"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                {currentTickers.length >= 5 && (
+                  <span className="text-xs text-muted-foreground self-center">
+                    (最大5銘柄)
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Options Row */}
@@ -118,6 +117,8 @@ export function TickerInput({ onAnalyze, isLoading }: TickerInputProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="3mo">3ヶ月</SelectItem>
+                  <SelectItem value="6mo">6ヶ月</SelectItem>
                   <SelectItem value="1y">1年</SelectItem>
                   <SelectItem value="3y">3年</SelectItem>
                   <SelectItem value="5y">5年</SelectItem>
@@ -133,6 +134,7 @@ export function TickerInput({ onAnalyze, isLoading }: TickerInputProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="0">0回以上</SelectItem>
                   <SelectItem value="10">10回以上</SelectItem>
                   <SelectItem value="20">20回以上</SelectItem>
                   <SelectItem value="30">30回以上</SelectItem>
@@ -159,7 +161,7 @@ export function TickerInput({ onAnalyze, isLoading }: TickerInputProps) {
             <div className="flex items-end">
               <Button
                 onClick={handleAnalyze}
-                disabled={tickers.length === 0 || isLoading}
+                disabled={currentTickers.length === 0 || isLoading}
                 className="w-full"
                 size="lg"
               >

@@ -10,6 +10,7 @@ import { PriceChart } from '@/components/price-chart'
 import { ParameterPanel } from '@/components/parameter-panel'
 import { ExportPanel } from '@/components/export-panel'
 import { MultiTickerComparison } from '@/components/multi-ticker-comparison'
+import { OptimizationPanel } from '@/components/optimization-panel'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { BacktestResult, SortField, OHLCV, BacktestMetrics, StrategyParams } from '@/types'
@@ -201,7 +202,7 @@ export default function Home() {
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
               <p className="text-muted-foreground">バックテストを実行中...</p>
               <p className="text-sm text-muted-foreground mt-1">
-                42戦略 × {analyzedTickers.length || 1}銘柄 を分析しています
+                72戦略 × {analyzedTickers.length || 1}銘柄を分析中
               </p>
             </CardContent>
           </Card>
@@ -373,18 +374,10 @@ export default function Home() {
             </TabsContent>
             
             <TabsContent value="optimize">
-              <Card>
-                <CardHeader>
-                  <CardTitle>パラメーター最適化</CardTitle>
-                </CardHeader>
-                <CardContent className="h-[400px] flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>グリッドサーチによるパラメーター最適化</p>
-                    <p className="text-xs mt-4 text-muted-foreground/70">今後のアップデートで実装予定</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <OptimizationPanel
+                selectedResult={selectedResult}
+                stockData={selectedResult ? (stockDataMap.get(selectedResult.ticker) || []) : []}
+              />
             </TabsContent>
             
             <TabsContent value="export">
@@ -413,8 +406,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t py-6 mt-12">
         <div className="container text-center text-sm text-muted-foreground">
-          <p>StrategyLab v1.1 - システムトレード戦略バックテストツール</p>
-          <p className="mt-1">62種類の戦略 × 複数銘柄対応</p>
+          <p>StrategyLab v1.3 - システムトレード戦略バックテストツール</p>
+          <p className="mt-1">72種類の戦略 × 複数銘柄対応 × パラメーター最適化</p>
         </div>
       </footer>
     </div>

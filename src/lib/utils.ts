@@ -8,7 +8,10 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Format number with comma separators
  */
-export function formatNumber(value: number, decimals = 2): string {
+export function formatNumber(value: number | null | undefined, decimals = 2): string {
+  if (value === null || value === undefined || isNaN(value)) {
+    return '-'
+  }
   return value.toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
@@ -18,7 +21,10 @@ export function formatNumber(value: number, decimals = 2): string {
 /**
  * Format percentage
  */
-export function formatPercent(value: number, decimals = 2): string {
+export function formatPercent(value: number | null | undefined, decimals = 2): string {
+  if (value === null || value === undefined || isNaN(value)) {
+    return '-'
+  }
   const sign = value >= 0 ? '+' : ''
   return `${sign}${value.toFixed(decimals)}%`
 }
