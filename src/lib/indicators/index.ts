@@ -33,3 +33,20 @@ export {
   findSwingPoints,
   fibonacciLevels,
 } from './advanced'
+
+// Extended indicators
+export {
+  trix,
+  cmf,
+  dmi,
+  kama,
+  dema,
+  chandelierExit,
+  aroon,
+  choppinessIndex,
+  forceIndex,
+  heikenAshi,
+  bollingerBandWidth,
+  vwma,
+  envelope,
+} from './extended'

@@ -67,20 +67,26 @@ export default function Home() {
       const backtestResult = await backtestResponse.json()
       
       if (backtestResult.success && backtestResult.data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const allResults: BacktestResult[] = backtestResult.data.flatMap(
-          (tickerData: { ticker: string; results: BacktestResult[] }) => 
-            tickerData.results.map(r => ({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (tickerData: any) => 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            tickerData.results.map((r: any) => ({
               ...r,
-              signals: r.signals.map((s: { date: string; type: string; price: number; indicatorValues?: Record<string, number> }) => ({
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              signals: r.signals.map((s: any) => ({
                 ...s,
                 date: new Date(s.date),
               })),
-              trades: r.trades.map((t: { entryDate: string; exitDate: string; entryPrice: number; exitPrice: number; type: string; profitPct: number; profitAmount: number; holdingDays: number }) => ({
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              trades: r.trades.map((t: any) => ({
                 ...t,
                 entryDate: new Date(t.entryDate),
                 exitDate: new Date(t.exitDate),
               })),
-              equity: r.equity.map((e: { date: string; equity: number; drawdown: number }) => ({
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              equity: r.equity.map((e: any) => ({
                 ...e,
                 date: new Date(e.date),
               })),
@@ -407,8 +413,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t py-6 mt-12">
         <div className="container text-center text-sm text-muted-foreground">
-          <p>StrategyLab v1.0 - システムトレード戦略バックテストツール</p>
-          <p className="mt-1">42種類の戦略 × 複数銘柄対応</p>
+          <p>StrategyLab v1.1 - システムトレード戦略バックテストツール</p>
+          <p className="mt-1">62種類の戦略 × 複数銘柄対応</p>
         </div>
       </footer>
     </div>

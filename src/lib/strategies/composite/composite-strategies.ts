@@ -112,8 +112,8 @@ export const VolatilityAdjusted: Strategy = {
             type: 'SELL',
             price: currPrice,
             indicatorValues: { 
-              hitStop: currPrice <= stopLoss,
-              hitTarget: currPrice >= takeProfit,
+              hitStop: currPrice <= stopLoss ? 1 : 0,
+              hitTarget: currPrice >= takeProfit ? 1 : 0,
             },
           })
           inPosition = false
@@ -164,7 +164,7 @@ export const MARibbon: Strategy = {
           date: data[i].date,
           type: 'BUY',
           price: closes[i],
-          indicatorValues: { aligned: 'bullish', ma5: currMAs[0], ma200: currMAs[5] },
+          indicatorValues: { aligned: 1, ma5: currMAs[0] ?? 0, ma200: currMAs[5] ?? 0 },
         })
         inPosition = true
       }
@@ -174,7 +174,7 @@ export const MARibbon: Strategy = {
           date: data[i].date,
           type: 'SELL',
           price: closes[i],
-          indicatorValues: { aligned: 'none' },
+          indicatorValues: { aligned: 0 },
         })
         inPosition = false
       }
@@ -337,7 +337,7 @@ export const FibonacciStrategy: Strategy = {
           date: data[i].date,
           type: 'SELL',
           price: currClose,
-          indicatorValues: { level: currClose >= fibs.level382 ? 'target' : 'stop' },
+          indicatorValues: { exitType: currClose >= fibs.level382 ? 1 : 0 },
         })
         inPosition = false
       }

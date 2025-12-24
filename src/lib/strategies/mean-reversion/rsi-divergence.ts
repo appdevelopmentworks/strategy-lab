@@ -48,7 +48,7 @@ export const RSIDivergence: Strategy = {
           date: data[i].date,
           type: 'BUY',
           price: currPrice,
-          indicatorValues: { rsi: currRSI, divergence: 'bullish' },
+          indicatorValues: { rsi: currRSI, isBullishDivergence: 1 },
         })
         inPosition = true
       }

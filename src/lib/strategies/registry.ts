@@ -1,7 +1,7 @@
 /**
  * Strategy Registry
  * 
- * Central registry for all 42 trading strategies with metadata and definitions.
+ * Central registry for all 62 trading strategies with metadata and definitions.
  */
 
 import type { StrategyInfo, StrategyCategory } from '@/types'
@@ -15,6 +15,14 @@ import { ADXtrend } from './trend-following/adx-trend'
 import { ParabolicSARStrategy } from './trend-following/parabolic-sar'
 import { SuperTrendStrategy } from './trend-following/supertrend'
 import { IchimokuCloudBreak } from './trend-following/ichimoku-cloud'
+import { 
+  DMIStrategy, 
+  KAMAStrategy, 
+  HeikenAshiStrategy, 
+  TripleMAStrategy,
+  AroonStrategy,
+  ChoppinessStrategy,
+} from './trend-following/extended'
 
 // Momentum strategies
 import { RSIcontrarian } from './momentum/rsi-contrarian'
@@ -25,6 +33,7 @@ import { WilliamsRStrategy } from './momentum/williams-r'
 import { ROCStrategy } from './momentum/roc'
 import { MomentumStrategy } from './momentum/momentum'
 import { RCIStrategy } from './momentum/rci'
+import { TRIXStrategy, DEMAStrategy, ForceIndexStrategy } from './momentum/extended'
 
 // Breakout strategies
 import { BollingerBreakout } from './breakout/bollinger-breakout'
@@ -32,17 +41,26 @@ import { DonchianBreakout } from './breakout/donchian-breakout'
 import { KeltnerBreakout } from './breakout/keltner-breakout'
 import { Week52HighBreakout } from './breakout/week52-high'
 import { ATRBreakout } from './breakout/atr-breakout'
+import { 
+  BollingerSqueezeStrategy, 
+  ATRTrailingStopStrategy, 
+  ChandelierExitStrategy,
+  GapStrategy,
+  VolatilityBreakoutStrategy,
+} from './breakout/extended'
 
 // Mean Reversion strategies
 import { BollingerReversion } from './mean-reversion/bollinger-reversion'
 import { RSIDivergence } from './mean-reversion/rsi-divergence'
 import { MADeviation } from './mean-reversion/ma-deviation'
 import { ZScoreStrategy } from './mean-reversion/zscore'
+import { EnvelopeStrategy } from './mean-reversion/extended'
 
 // Volume strategies
 import { OBVStrategy } from './volume/obv'
 import { MFIStrategy } from './volume/mfi'
 import { VWAPReversal, VolumeBreakout } from './volume/vwap-volume'
+import { CMFStrategy, VolumeSpikeStrategy, VWMAStrategy } from './volume/extended'
 
 // Pattern strategies
 import { GoldenCross } from './pattern/golden-cross'
@@ -60,12 +78,13 @@ import {
   FibonacciStrategy,
   HighLowBreakout,
 } from './composite/composite-strategies'
+import { SeasonalityStrategy, WeeklyPivotStrategy } from './composite/extended'
 
 /**
- * All registered strategies (42 total)
+ * All registered strategies (62 total)
  */
 export const strategies: Strategy[] = [
-  // Trend Following (7)
+  // Trend Following (13)
   SMAcrossover,
   EMAcrossover,
   MACDsignal,
@@ -73,7 +92,13 @@ export const strategies: Strategy[] = [
   ParabolicSARStrategy,
   SuperTrendStrategy,
   IchimokuCloudBreak,
-  // Momentum (8)
+  DMIStrategy,
+  KAMAStrategy,
+  HeikenAshiStrategy,
+  TripleMAStrategy,
+  AroonStrategy,
+  ChoppinessStrategy,
+  // Momentum (11)
   RSIcontrarian,
   RSItrend,
   StochasticStrategy,
@@ -82,29 +107,41 @@ export const strategies: Strategy[] = [
   ROCStrategy,
   MomentumStrategy,
   RCIStrategy,
-  // Breakout (5)
+  TRIXStrategy,
+  DEMAStrategy,
+  ForceIndexStrategy,
+  // Breakout (10)
   BollingerBreakout,
   DonchianBreakout,
   KeltnerBreakout,
   Week52HighBreakout,
   ATRBreakout,
-  // Mean Reversion (4)
+  BollingerSqueezeStrategy,
+  ATRTrailingStopStrategy,
+  ChandelierExitStrategy,
+  GapStrategy,
+  VolatilityBreakoutStrategy,
+  // Mean Reversion (5)
   BollingerReversion,
   RSIDivergence,
   MADeviation,
   ZScoreStrategy,
-  // Volume (4)
+  EnvelopeStrategy,
+  // Volume (7)
   OBVStrategy,
   MFIStrategy,
   VWAPReversal,
   VolumeBreakout,
+  CMFStrategy,
+  VolumeSpikeStrategy,
+  VWMAStrategy,
   // Pattern (5)
   GoldenCross,
   DeadCross,
   IchimokuSanku,
   DoubleBottom,
   HeadAndShoulders,
-  // Composite (9)
+  // Composite (11)
   MACDRSIStrategy,
   TurtleStrategy,
   TrendMomentum,
@@ -114,13 +151,15 @@ export const strategies: Strategy[] = [
   PivotPointsStrategy,
   FibonacciStrategy,
   HighLowBreakout,
+  SeasonalityStrategy,
+  WeeklyPivotStrategy,
 ]
 
 /**
  * Strategy metadata registry
  */
 export const strategyRegistry: StrategyInfo[] = [
-  // ===== Trend Following (7) =====
+  // ===== Trend Following (13) =====
   {
     id: 'TF001',
     name: 'SMA Crossover',
@@ -207,8 +246,82 @@ export const strategyRegistry: StrategyInfo[] = [
       { name: 'senkouPeriod', label: 'Senkou', labelJa: '先行スパン', type: 'number', default: 52, min: 30, max: 80, step: 1 },
     ],
   },
+  {
+    id: 'TF008',
+    name: 'DMI',
+    nameJa: 'DMI（方向性指数）',
+    category: 'trend-following',
+    description: '+DI and -DI crossover with ADX filter',
+    descriptionJa: '+DIと-DIのクロスでADXフィルター付きエントリー',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 14, min: 7, max: 28, step: 1 },
+      { name: 'adxThreshold', label: 'ADX Threshold', labelJa: 'ADX閾値', type: 'number', default: 25, min: 15, max: 40, step: 5 },
+    ],
+  },
+  {
+    id: 'TF009',
+    name: 'KAMA',
+    nameJa: 'KAMA（適応型MA）',
+    category: 'trend-following',
+    description: 'Kaufman Adaptive Moving Average crossover',
+    descriptionJa: 'カウフマン適応型移動平均のクロス',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 10, min: 5, max: 20, step: 1 },
+      { name: 'fastSC', label: 'Fast SC', labelJa: '高速SC', type: 'number', default: 2, min: 2, max: 5, step: 1 },
+      { name: 'slowSC', label: 'Slow SC', labelJa: '低速SC', type: 'number', default: 30, min: 20, max: 50, step: 5 },
+    ],
+  },
+  {
+    id: 'TF010',
+    name: 'Heiken Ashi',
+    nameJa: '平均足',
+    category: 'trend-following',
+    description: 'Trade on consecutive Heiken Ashi candles',
+    descriptionJa: '平均足の連続陽線/陰線でエントリー',
+    parameters: [
+      { name: 'consecutiveCandles', label: 'Consecutive Candles', labelJa: '連続本数', type: 'number', default: 2, min: 2, max: 5, step: 1 },
+    ],
+  },
+  {
+    id: 'TF011',
+    name: 'Triple MA',
+    nameJa: 'トリプルMA',
+    category: 'trend-following',
+    description: 'Three MA alignment for strong trend',
+    descriptionJa: '3本のMAが整列したら強いトレンド',
+    parameters: [
+      { name: 'shortPeriod', label: 'Short', labelJa: '短期', type: 'number', default: 5, min: 3, max: 10, step: 1 },
+      { name: 'mediumPeriod', label: 'Medium', labelJa: '中期', type: 'number', default: 20, min: 10, max: 30, step: 5 },
+      { name: 'longPeriod', label: 'Long', labelJa: '長期', type: 'number', default: 50, min: 30, max: 100, step: 10 },
+    ],
+  },
+  {
+    id: 'TF012',
+    name: 'Aroon',
+    nameJa: 'アルーン',
+    category: 'trend-following',
+    description: 'Aroon Up/Down crossover strategy',
+    descriptionJa: 'アルーン指標のクロスでエントリー',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 25, min: 10, max: 50, step: 5 },
+      { name: 'threshold', label: 'Threshold', labelJa: '閾値', type: 'number', default: 50, min: 30, max: 70, step: 10 },
+    ],
+  },
+  {
+    id: 'TF013',
+    name: 'Choppiness Index',
+    nameJa: 'チョピネス指数',
+    category: 'trend-following',
+    description: 'Trade when market is trending (low choppiness)',
+    descriptionJa: 'チョピネスが低い時（トレンド発生時）にエントリー',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 14, min: 7, max: 28, step: 1 },
+      { name: 'trendThreshold', label: 'Trend Threshold', labelJa: 'トレンド閾値', type: 'number', default: 38.2, min: 30, max: 50, step: 2 },
+      { name: 'maPeriod', label: 'MA Period', labelJa: 'MA期間', type: 'number', default: 20, min: 10, max: 50, step: 5 },
+    ],
+  },
 
-  // ===== Momentum (8) =====
+  // ===== Momentum (11) =====
   {
     id: 'MO001',
     name: 'RSI Trend',
@@ -310,8 +423,42 @@ export const strategyRegistry: StrategyInfo[] = [
       { name: 'overbought', label: 'Overbought', labelJa: '買われすぎ', type: 'number', default: 80, min: 60, max: 95, step: 5 },
     ],
   },
+  {
+    id: 'MO009',
+    name: 'TRIX',
+    nameJa: 'TRIX',
+    category: 'momentum',
+    description: 'Triple EMA oscillator crossover',
+    descriptionJa: 'トリプルEMAオシレーターのシグナルクロス',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 14, min: 7, max: 28, step: 1 },
+    ],
+  },
+  {
+    id: 'MO010',
+    name: 'DEMA Cross',
+    nameJa: 'DEMAクロス',
+    category: 'momentum',
+    description: 'Double EMA crossover for faster signals',
+    descriptionJa: 'ダブルEMAのクロスで高速シグナル',
+    parameters: [
+      { name: 'shortPeriod', label: 'Short Period', labelJa: '短期期間', type: 'number', default: 12, min: 5, max: 20, step: 1 },
+      { name: 'longPeriod', label: 'Long Period', labelJa: '長期期間', type: 'number', default: 26, min: 15, max: 50, step: 1 },
+    ],
+  },
+  {
+    id: 'MO011',
+    name: 'Force Index',
+    nameJa: 'フォースインデックス',
+    category: 'momentum',
+    description: 'Elder Force Index zero line crossover',
+    descriptionJa: 'エルダーのフォースインデックスのゼロラインクロス',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 13, min: 5, max: 21, step: 1 },
+    ],
+  },
 
-  // ===== Breakout (5) =====
+  // ===== Breakout (10) =====
   {
     id: 'BO001',
     name: 'Bollinger Breakout',
@@ -373,8 +520,71 @@ export const strategyRegistry: StrategyInfo[] = [
       { name: 'smaPeriod', label: 'SMA Period', labelJa: 'SMA期間', type: 'number', default: 20, min: 10, max: 50, step: 5 },
     ],
   },
+  {
+    id: 'BO006',
+    name: 'Bollinger Squeeze',
+    nameJa: 'ボリンジャースクイーズ',
+    category: 'breakout',
+    description: 'Trade breakout after volatility squeeze',
+    descriptionJa: 'ボラティリティ収縮後のブレイクアウト',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 20, min: 10, max: 50, step: 5 },
+      { name: 'stdDev', label: 'Std Dev', labelJa: '標準偏差', type: 'number', default: 2, min: 1, max: 3, step: 0.5 },
+      { name: 'squeezeLookback', label: 'Squeeze Lookback', labelJa: 'スクイーズ期間', type: 'number', default: 20, min: 10, max: 50, step: 5 },
+    ],
+  },
+  {
+    id: 'BO007',
+    name: 'ATR Trailing Stop',
+    nameJa: 'ATRトレーリングストップ',
+    category: 'breakout',
+    description: 'ATR-based trailing stop strategy',
+    descriptionJa: 'ATRベースのトレーリングストップ',
+    parameters: [
+      { name: 'atrPeriod', label: 'ATR Period', labelJa: 'ATR期間', type: 'number', default: 14, min: 7, max: 28, step: 1 },
+      { name: 'multiplier', label: 'Multiplier', labelJa: '乗数', type: 'number', default: 3, min: 1, max: 5, step: 0.5 },
+      { name: 'maPeriod', label: 'MA Period', labelJa: 'MA期間', type: 'number', default: 20, min: 10, max: 50, step: 5 },
+    ],
+  },
+  {
+    id: 'BO008',
+    name: 'Chandelier Exit',
+    nameJa: 'シャンデリアエグジット',
+    category: 'breakout',
+    description: 'Chandelier exit trailing stop',
+    descriptionJa: 'シャンデリアエグジットのトレーリングストップ',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 22, min: 10, max: 40, step: 2 },
+      { name: 'multiplier', label: 'Multiplier', labelJa: '乗数', type: 'number', default: 3, min: 1, max: 5, step: 0.5 },
+    ],
+  },
+  {
+    id: 'BO009',
+    name: 'Gap',
+    nameJa: 'ギャップ戦略',
+    category: 'breakout',
+    description: 'Trade on price gaps',
+    descriptionJa: 'ギャップ発生時にエントリー',
+    parameters: [
+      { name: 'gapThreshold', label: 'Gap Threshold %', labelJa: 'ギャップ閾値%', type: 'number', default: 2, min: 1, max: 5, step: 0.5 },
+      { name: 'holdDays', label: 'Hold Days', labelJa: '保有日数', type: 'number', default: 3, min: 1, max: 10, step: 1 },
+    ],
+  },
+  {
+    id: 'BO010',
+    name: 'Volatility Breakout',
+    nameJa: 'ボラティリティブレイクアウト',
+    category: 'breakout',
+    description: 'Trade on abnormal volatility expansion',
+    descriptionJa: '異常なボラティリティ拡大時にエントリー',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 20, min: 10, max: 50, step: 5 },
+      { name: 'multiplier', label: 'Multiplier', labelJa: '乗数', type: 'number', default: 2, min: 1.5, max: 4, step: 0.5 },
+      { name: 'holdDays', label: 'Hold Days', labelJa: '保有日数', type: 'number', default: 3, min: 1, max: 10, step: 1 },
+    ],
+  },
 
-  // ===== Mean Reversion (4) =====
+  // ===== Mean Reversion (5) =====
   {
     id: 'MR001',
     name: 'Bollinger Reversion',
@@ -425,8 +635,20 @@ export const strategyRegistry: StrategyInfo[] = [
       { name: 'sellThreshold', label: 'Sell Threshold', labelJa: '売り閾値', type: 'number', default: 2, min: 1, max: 3, step: 0.5 },
     ],
   },
+  {
+    id: 'MR005',
+    name: 'Envelope',
+    nameJa: 'エンベロープ',
+    category: 'mean-reversion',
+    description: 'Trade at envelope bands',
+    descriptionJa: 'エンベロープバンドで逆張りエントリー',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 25, min: 10, max: 50, step: 5 },
+      { name: 'percentage', label: 'Percentage', labelJa: '乖離率%', type: 'number', default: 2.5, min: 1, max: 5, step: 0.5 },
+    ],
+  },
 
-  // ===== Volume (4) =====
+  // ===== Volume (7) =====
   {
     id: 'VO001',
     name: 'OBV',
@@ -475,6 +697,42 @@ export const strategyRegistry: StrategyInfo[] = [
       { name: 'overbought', label: 'Overbought', labelJa: '買われすぎ', type: 'number', default: 80, min: 70, max: 90, step: 5 },
     ],
   },
+  {
+    id: 'VO005',
+    name: 'CMF',
+    nameJa: 'CMF（チャイキンマネーフロー）',
+    category: 'volume',
+    description: 'Chaikin Money Flow crossover',
+    descriptionJa: 'チャイキンマネーフローの閾値クロス',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 20, min: 10, max: 40, step: 5 },
+      { name: 'buyThreshold', label: 'Buy Threshold', labelJa: '買い閾値', type: 'number', default: 0.05, min: 0.01, max: 0.15, step: 0.01 },
+      { name: 'sellThreshold', label: 'Sell Threshold', labelJa: '売り閾値', type: 'number', default: -0.05, min: -0.15, max: -0.01, step: 0.01 },
+    ],
+  },
+  {
+    id: 'VO006',
+    name: 'Volume Spike',
+    nameJa: '出来高スパイク',
+    category: 'volume',
+    description: 'Trade on volume spikes',
+    descriptionJa: '出来高スパイク発生時にエントリー',
+    parameters: [
+      { name: 'maPeriod', label: 'MA Period', labelJa: 'MA期間', type: 'number', default: 20, min: 10, max: 50, step: 5 },
+      { name: 'spikeMultiplier', label: 'Spike Multiplier', labelJa: 'スパイク倍率', type: 'number', default: 2.5, min: 1.5, max: 5, step: 0.5 },
+    ],
+  },
+  {
+    id: 'VO007',
+    name: 'VWMA',
+    nameJa: 'VWMA（出来高加重MA）',
+    category: 'volume',
+    description: 'Volume Weighted Moving Average crossover',
+    descriptionJa: '出来高加重移動平均のクロス',
+    parameters: [
+      { name: 'period', label: 'Period', labelJa: '期間', type: 'number', default: 20, min: 10, max: 50, step: 5 },
+    ],
+  },
 
   // ===== Pattern (5) =====
   {
@@ -506,7 +764,7 @@ export const strategyRegistry: StrategyInfo[] = [
     name: 'Ichimoku Sanku',
     nameJa: '三役好転',
     category: 'pattern',
-    description: 'Ichimoku bullish alignment (Tenkan > Kijun, Price > Cloud, Chikou > Price)',
+    description: 'Ichimoku bullish alignment',
     descriptionJa: '転換線>基準線、価格>雲、遅行線>価格で買い',
     parameters: [
       { name: 'tenkanPeriod', label: 'Tenkan', labelJa: '転換線', type: 'number', default: 9, min: 5, max: 15, step: 1 },
@@ -539,7 +797,7 @@ export const strategyRegistry: StrategyInfo[] = [
     ],
   },
 
-  // ===== Composite (9) =====
+  // ===== Composite (11) =====
   {
     id: 'CO001',
     name: 'MACD + RSI Filter',
@@ -643,6 +901,26 @@ export const strategyRegistry: StrategyInfo[] = [
       { name: 'entryPeriod', label: 'Entry Period', labelJa: 'エントリー期間', type: 'number', default: 20, min: 10, max: 55, step: 5 },
       { name: 'exitPeriod', label: 'Exit Period', labelJa: '出口期間', type: 'number', default: 10, min: 5, max: 20, step: 5 },
       { name: 'atrPeriod', label: 'ATR Period', labelJa: 'ATR期間', type: 'number', default: 20, min: 10, max: 30, step: 5 },
+    ],
+  },
+  {
+    id: 'CO010',
+    name: 'Seasonality',
+    nameJa: '季節性戦略',
+    category: 'composite',
+    description: 'Trade based on monthly seasonality patterns',
+    descriptionJa: '月別季節性パターン（Sell in May等）',
+    parameters: [],
+  },
+  {
+    id: 'CO011',
+    name: 'Weekly Pivot Points',
+    nameJa: '週足ピボット',
+    category: 'composite',
+    description: 'Weekly pivot point strategy',
+    descriptionJa: '週足ベースのピボットポイント',
+    parameters: [
+      { name: 'threshold', label: 'Threshold', labelJa: '閾値', type: 'number', default: 0.02, min: 0.01, max: 0.05, step: 0.01 },
     ],
   },
 ]
