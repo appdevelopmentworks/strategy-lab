@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import yahooFinance from 'yahoo-finance2'
 import type { OHLCV, Period } from '@/types'
 
+// Suppress deprecation notices
+yahooFinance.suppressNotices(['ripHistorical', 'yahooSurvey'])
+
 // Period to date range mapping
 const periodToDays: Record<string, number> = {
   '1mo': 30,
@@ -28,33 +31,35 @@ export async function GET(
     const days = periodToDays[period] || 365 * 5 // Default to 5 years
     startDate.setDate(startDate.getDate() - days)
 
-    // Fetch data from Yahoo Finance
-    const result = await yahooFinance.historical(ticker, {
+    // Fetch data from Yahoo Finance using chart() API (v3)
+    const result = await yahooFinance.chart(ticker, {
       period1: startDate,
       period2: endDate,
       interval: '1d',
     })
 
-    // Transform data
-    const data: OHLCV[] = result.map(item => ({
-      date: item.date,
-      open: item.open,
-      high: item.high,
-      low: item.low,
-      close: item.close,
-      volume: item.volume,
-      adjClose: item.adjClose,
-    }))
+    // Transform data from chart response
+    const data: OHLCV[] = result.quotes
+      .filter(item => item.open !== null && item.high !== null && item.low !== null && item.close !== null)
+      .map(item => ({
+        date: item.date,
+        open: item.open!,
+        high: item.high!,
+        low: item.low!,
+        close: item.close!,
+        volume: item.volume || 0,
+        adjClose: item.adjclose,
+      }))
 
-    // Get quote for metadata
-    const quote = await yahooFinance.quote(ticker)
+    // Get metadata from chart result
+    const meta = result.meta
 
     return NextResponse.json({
       success: true,
       data: {
         ticker,
-        currency: quote.currency || 'USD',
-        name: quote.shortName || quote.longName || ticker,
+        currency: meta.currency || 'USD',
+        name: meta.shortName || meta.longName || ticker,
         data,
       },
     })

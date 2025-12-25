@@ -4,6 +4,9 @@ import { strategies, strategyRegistry, getDefaultParams } from '@/lib/strategies
 import { runBacktest } from '@/lib/backtest/engine'
 import type { OHLCV, Period, BacktestResult } from '@/types'
 
+// Suppress deprecation notices
+yahooFinance.suppressNotices(['ripHistorical', 'yahooSurvey'])
+
 // Period to date range mapping
 const periodToDays: Record<string, number> = {
   '1mo': 30,
@@ -51,21 +54,24 @@ export async function POST(request: NextRequest) {
 
       let stockData: OHLCV[]
       try {
-        const historical = await yahooFinance.historical(ticker, {
+        // Use chart() API (v3) instead of historical()
+        const chartResult = await yahooFinance.chart(ticker, {
           period1: startDate,
           period2: endDate,
           interval: '1d',
         })
 
-        stockData = historical.map(item => ({
-          date: item.date,
-          open: item.open,
-          high: item.high,
-          low: item.low,
-          close: item.close,
-          volume: item.volume,
-          adjClose: item.adjClose,
-        }))
+        stockData = chartResult.quotes
+          .filter(item => item.open !== null && item.high !== null && item.low !== null && item.close !== null)
+          .map(item => ({
+            date: item.date,
+            open: item.open!,
+            high: item.high!,
+            low: item.low!,
+            close: item.close!,
+            volume: item.volume || 0,
+            adjClose: item.adjclose,
+          }))
       } catch (error) {
         console.error(`Failed to fetch data for ${ticker}:`, error)
         continue
