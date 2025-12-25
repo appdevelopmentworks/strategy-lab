@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import yahooFinance from 'yahoo-finance2'
+import YahooFinance from 'yahoo-finance2'
 import { strategies, strategyRegistry, getDefaultParams } from '@/lib/strategies/registry'
 import { runBacktest } from '@/lib/backtest/engine'
 import type { OHLCV, Period, BacktestResult } from '@/types'
 
-// Suppress deprecation notices
-yahooFinance.suppressNotices(['ripHistorical', 'yahooSurvey'])
+// Create yahoo-finance2 instance (v3)
+const yahooFinance = new YahooFinance()
 
 // Period to date range mapping
 const periodToDays: Record<string, number> = {
