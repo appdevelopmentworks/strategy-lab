@@ -2,7 +2,7 @@
 
 システムトレード戦略のバックテスト・分析ツール
 
-![Version](https://img.shields.io/badge/version-1.5.0-blue)
+![Version](https://img.shields.io/badge/version-1.5.1-blue)
 ![Strategies](https://img.shields.io/badge/strategies-72-green)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 
@@ -92,9 +92,17 @@ StrategyLabは、72種類のトレード戦略を自動でバックテストし�
 ### 📈 可視化
 
 - **価格チャート**: ローソク足/ラインチャート（lightweight-charts）
-- **売買シグナル**: チャート上にBUY/SELLマーカー表示
+- **売買シグナル**: チャート上にEntry/Exitマーカー表示（※ロングのみ対応）
 - **結果チャート**: 戦略別パフォーマンス比較グラフ
 - **最適化チャート**: スコア分布、サンプル資産曲線、効率的フロンティア
+
+### 📖 ユーザーマニュアル（v1.5.1 NEW）
+
+- **使い方ヘルプ**: スライドパネル形式でアプリ内で表示（ヘッダーの「?」ボタン）
+- **戦略ガイド**: 72戦略の詳細解説ページ（/docs）
+  - カテゴリー別表示
+  - 検索・フィルター機能
+  - パラメーター一覧
 
 ### 📤 エクスポート
 
@@ -293,7 +301,8 @@ strategy-lab/
 
 ## 更新履歴
 
-- **v1.5.0** - 資金管理指標追加（期待値・Kelly・ATR・CAGR・Calmar等）🆕
+- **v1.5.1** - ユーザーマニュアル追加、UI改善、yahoo-finance2 v3対応 🆕
+- **v1.5.0** - 資金管理指標追加（期待値・Kelly・ATR・CAGR・Calmar等）
 - **v1.4.0** - ウォークフォワード検証・ポートフォリオ最適化追加
 - **v1.3.0** - カレンダー戦略追加（曜日効果・固定保有・月初月末）72戦略
 - **v1.2.0** - グリッドサーチ最適化、モンテカルロシミュレーション追加

@@ -77,8 +77,20 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      if (stockData.length < 200) {
-        console.warn(`Insufficient data for ${ticker}: ${stockData.length} days`)
+      // Minimum data requirements based on period (actual trading days)
+      const minDataDays: Record<string, number> = {
+        '1mo': 20,
+        '3mo': 60,
+        '6mo': 120,
+        '1y': 150,
+        '3y': 200,
+        '5y': 200,
+        '10y': 200,
+      }
+      const requiredDays = minDataDays[period] || 200
+      
+      if (stockData.length < requiredDays) {
+        console.warn(`Insufficient data for ${ticker}: ${stockData.length} days (required: ${requiredDays})`)
         continue
       }
 
