@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
             low: item.low!,
             close: item.close!,
             volume: item.volume || 0,
-            adjClose: item.adjclose,
+            adjClose: item.adjclose ?? undefined,
           }))
       } catch (error) {
         console.error(`Failed to fetch data for ${ticker}:`, error)

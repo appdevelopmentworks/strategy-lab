@@ -55,8 +55,8 @@ export function ResultsTable({ results, onSelectStrategy, selectedStrategyId }: 
 
     // Sort
     filtered.sort((a, b) => {
-      const aMetrics = a.metrics as Record<string, number>
-      const bMetrics = b.metrics as Record<string, number>
+      const aMetrics = a.metrics as unknown as Record<string, number>
+      const bMetrics = b.metrics as unknown as Record<string, number>
       const aValue = aMetrics[sortField] ?? 0
       const bValue = bMetrics[sortField] ?? 0
       const diff = aValue - bValue

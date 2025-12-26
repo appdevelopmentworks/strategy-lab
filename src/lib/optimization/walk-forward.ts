@@ -270,8 +270,8 @@ export function runWalkForward(config: WalkForwardConfig): WalkForwardResult {
   const overfitPenalty = overfitRatio > 2 ? 0 : (2 - overfitRatio) * 50 // 0-100
   const robustnessScore = Math.round((consistency + testPerformance + overfitPenalty) / 3)
   
-  // Get ticker from first data point or use empty string
-  const ticker = stockData[0]?.ticker || ''
+  // Ticker is not available from OHLCV data, use empty string
+  const ticker = ''
   
   return {
     strategyId: config.strategyId,

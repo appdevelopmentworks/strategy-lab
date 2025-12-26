@@ -48,7 +48,7 @@ export async function GET(
         low: item.low!,
         close: item.close!,
         volume: item.volume || 0,
-        adjClose: item.adjclose,
+        adjClose: item.adjclose ?? undefined,
       }))
 
     // Get metadata from chart result

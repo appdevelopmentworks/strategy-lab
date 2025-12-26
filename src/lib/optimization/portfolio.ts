@@ -459,9 +459,14 @@ function generateEfficientFrontier(
   riskFreeRate: number,
   constraints: { minWeight: number; maxWeight: number },
   numPoints: number = 20
-): PortfolioResult['efficientFrontier'] {
+): NonNullable<PortfolioResult['efficientFrontier']> {
   const n = assets.length
-  const points: PortfolioResult['efficientFrontier']['points'] = []
+  const points: Array<{
+    return: number
+    volatility: number
+    sharpe: number
+    weights: number[]
+  }> = []
   
   // Find return range
   const minRet = Math.min(...expectedReturns)
